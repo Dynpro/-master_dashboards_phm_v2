@@ -1,6 +1,6 @@
 view: vw_medical {
   label: "Medical records"
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
     ;;
 
   dimension: 2012_chronic {

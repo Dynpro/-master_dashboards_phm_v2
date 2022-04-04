@@ -1,5 +1,5 @@
 view: vw_preventive_screening {
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_PREVENTIVE_SCREENING"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_PREVENTIVE_SCREENING"
     ;;
 
   dimension: cancer_diagnosis {

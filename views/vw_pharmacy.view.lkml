@@ -1,6 +1,6 @@
 view: vw_pharmacy {
   label: "Pharmacy records"
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_PHARMACY"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_PHARMACY"
     ;;
 
   dimension: ace_inhibitor {

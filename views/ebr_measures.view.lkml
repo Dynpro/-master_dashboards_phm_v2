@@ -1,5 +1,5 @@
 view: ebr_measures {
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."EBR_MEASURES"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_EBR_MEASURES"
     ;;
 
   dimension: individual_gets_diabetic_test_strips {
