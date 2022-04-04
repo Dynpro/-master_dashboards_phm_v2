@@ -1,6 +1,6 @@
 view: vw_pharmacy {
   label: "Pharmacy records"
-  sql_table_name: "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_PHARMACY"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_PHARMACY"
     ;;
 
   dimension: ace_inhibitor {
@@ -170,19 +170,19 @@ view: vw_pharmacy {
     sql: ${TABLE}."MEMBER_AGE" ;;
   }
 
+  dimension: member_id {
+    type: string
+    hidden:  yes
+    sql: ${TABLE}."MEMBER_ID" ;;
+  }
+
   dimension: Age_Group {
     type: tier
     label: "AGE GROUP-2"
     tiers: [20, 30, 40, 50, 60]
     description: "AGE Group>> 0-19, 20-29, 30-39, 40-49, 50-59 & >=60 yrs"
     style: integer
-    sql:  ${TABLE}."MEMBER_AGE";;
-  }
-
-  dimension: member_id {
-    type: string
-    hidden:  yes
-    sql: ${TABLE}."MEMBER_ID" ;;
+    sql:  ${member_age};;
   }
 
   dimension: member_relationship_code {
@@ -407,7 +407,7 @@ view: vw_pharmacy {
   dimension: unique_id {
     type: string
     primary_key: yes
-    hidden: yes
+    hidden: no
     sql: ${TABLE}."UNIQUE_ID" ;;
   }
 
@@ -416,6 +416,18 @@ view: vw_pharmacy {
   #   primary_key: yes
   #   sql: ${unique_id} ;;
   # }
+
+  dimension: Group_Number {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
+
+  dimension: insured_Flag {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
+  }
 
   measure: employer_paid_amount {
     type: sum
@@ -475,5 +487,17 @@ view: vw_pharmacy {
   dimension: PARTICIPANT_Flag {
     type: string
     sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+  }
+
+  dimension: Patient_DOB{
+    type: string
+    label: "Patient DOB"
+    sql: ${TABLE}."MEMBER_DOB";;
+  }
+
+  dimension: PARTICIPANT_PROGRAM_NAME{
+    type: string
+    label: "PARTICIPANT_PROGRAM_NAME"
+    sql: ${TABLE}."PARTICIPANT_PROGRAM_NAME";;
   }
 }

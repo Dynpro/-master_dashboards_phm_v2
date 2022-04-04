@@ -1,9 +1,9 @@
 view: vw_risk_group_med_pharma_summary {
   label: "Risk Group Summary - MED & PHARMA Unique population"
   derived_table: {
-    sql: select * from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_RISK_GROUP_MIGRATION"
+    sql: select * from "SCH_ALL_HEALTH_CHOICE"."VW_RISK_GROUP_MIGRATION"
           WHERE
-            UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_MEDICAL"
+            UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
             WHERE
                 {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
                 {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
@@ -19,9 +19,8 @@ view: vw_risk_group_med_pharma_summary {
                 {% condition CHRONIC_OR_NOT %} "2012_CHRONIC" {% endcondition %} AND
                 {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
                 {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %})
-
          AND
-            UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_PHARMACY"
+            UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."VW_PHARMACY"
             WHERE
                 {% condition ACE_INHIBITOR_DRUGS %} "ACE_INHIBITOR" {% endcondition %} AND
                 {% condition STATIN_DRUGS %} "STATIN" {% endcondition %} AND
@@ -32,8 +31,8 @@ view: vw_risk_group_med_pharma_summary {
                 {% condition SPECIALTY_DRUGS %} "SPECIALTY_DRUGS" {% endcondition %} AND
                 {% condition MAINTENANCE_DRUGS %} "MAINTENANCE" {% endcondition %} AND
                 {% condition DIGESTIVE_DISEASE_DRUGS %} "DIGESTIVE_DISEASE" {% endcondition %} AND
-                {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %})
-
+                {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %}
+                )
     ;;
   }
   drill_fields: [Unique_id, File_year, Risk_group, Total_paid_amt, Mean_paid_amt, Chronic, Chronic_count, Comorbid, Comorbid_count]
@@ -66,7 +65,6 @@ view: vw_risk_group_med_pharma_summary {
 
   dimension: File_year {
     type: string
-    label: "Year"
     sql: ${TABLE}."FILE_YEAR" ;;
   }
 
@@ -213,7 +211,6 @@ view: vw_risk_group_med_pharma_summary {
   }
 
 
-
   #Pharmacy filters applied on vw_pharmacy tab.
   filter: ACE_INHIBITOR_DRUGS {
     type: string
@@ -285,10 +282,20 @@ view: vw_risk_group_med_pharma_summary {
     suggest_dimension: vw_pharmacy.black_label_drug
   }
 
-  dimension: PARTICIPANT_FLAG {
+  dimension: PARTICIPANT_FLAG{
     type: string
     label: "PARTICIPANT Flag"
     sql: ${TABLE}."PARTICIPANT_FLAG" ;;
   }
+  dimension: Group_Number {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
 
+  dimension: insured_Flag {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
+  }
 }

@@ -1,5 +1,5 @@
 view: ebr_measures {
-  sql_table_name: "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_EBR_MEASURES"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."EBR_MEASURES"
     ;;
 
   dimension: individual_gets_diabetic_test_strips {
@@ -34,22 +34,22 @@ view: ebr_measures {
 
   dimension: individual_had_emergency_room_and_inpatient_visit {
     type: string
-    label: "ER & Inpatient Visit"
-    description: "INDIVIDUAL HAD EMERGENCY ROOM & SUBSEQUENT INPATIENT VISIT"
+    label: "ER Visit but No Subsequent Inpatient Visit"
+    description: "INDIVIDUAL HAD EMERGENCY ROOM VISIT but NO SUBSEQUENT INPATIENT VISIT"
     sql: ${TABLE}."INDIVIDUAL_HAD_EMERGENCY_ROOM_AND_INPATIENT_VISIT" ;;
   }
 
   measure: individual_had_emergency_room_and_inpatient_visit_patients {
     type: count_distinct
     filters: [individual_had_emergency_room_and_inpatient_visit: "1"]
-    label: "ER & Inpatient Visit - N"
-    description: "INDIVIDUAL HAD EMERGENCY ROOM & SUBSEQUENT INPATIENT VISIT"
+    label: "ER Visit but No Subsequent Inpatient Visit - N"
+    description: "INDIVIDUAL HAD EMERGENCY ROOM VISIT but NO SUBSEQUENT INPATIENT VISIT"
     sql: ${unique_id} ;;
   }
 
   dimension: individual_is_in_disease_group {
     type: string
-    hidden: yes
+    hidden: no
     sql: ${TABLE}."INDIVIDUAL_IS_IN_DISEASE_GROUP" ;;
   }
 
@@ -341,7 +341,7 @@ view: ebr_measures {
   }
 
   dimension: year {
-    type: string
+    type: number
     label: "Year"
     sql: ${TABLE}."YEAR" ;;
   }
@@ -362,4 +362,5 @@ view: ebr_measures {
     type: string
     sql: ${TABLE}."PARTICIPANT_FLAG" ;;
   }
+
 }

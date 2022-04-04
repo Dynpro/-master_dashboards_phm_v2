@@ -1,6 +1,6 @@
 view: vw_medical {
   label: "Medical records"
-  sql_table_name: "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_MEDICAL"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
     ;;
 
   dimension: 2012_chronic {
@@ -427,7 +427,7 @@ view: vw_medical {
   dimension: unique_id {
     type: string
     primary_key: yes
-    hidden: yes
+    hidden: no
     sql: ${TABLE}."UNIQUE_ID" ;;
   }
 
@@ -465,7 +465,7 @@ view: vw_medical {
         END    ;;
   }
 
-  dimension: ageGroup {
+  dimension: Age_Group {
     type: tier
     label: "AGE GROUP-2"
     tiers: [20, 30, 40, 50, 60]
@@ -527,6 +527,7 @@ view: vw_medical {
     type: count_distinct
     label: "N"
     sql:  ${unique_id} ;;
+    drill_fields: [icd_disease_category, DIAGNOSIS_SUB_CATEGORY, icd_description, PROCEDURE_CATEGORY, PROCEDURE_SUBCATEGORY, procedure_description, icd_chronic_cat]
   }
 
   measure: Patient_percentage {
@@ -540,6 +541,7 @@ view: vw_medical {
     type: sum
     label: "TOTAL $"
     sql:  ${Total_Paid_Amount} ;;
+    drill_fields: [icd_disease_category, DIAGNOSIS_SUB_CATEGORY, icd_description, PROCEDURE_CATEGORY, PROCEDURE_SUBCATEGORY, procedure_description, icd_chronic_cat]
     value_format: "$#,##0"
   }
 
@@ -556,6 +558,7 @@ view: vw_medical {
     sql: CASE WHEN ${Total_Patients} <> 0 THEN ${Total_Paid_Amt}/${Total_Patients}
         ELSE 0
         END;;
+    drill_fields: [icd_disease_category, DIAGNOSIS_SUB_CATEGORY, icd_description, PROCEDURE_CATEGORY, PROCEDURE_SUBCATEGORY, procedure_description, icd_chronic_cat]
     value_format: "$#,##0"
   }
 
@@ -643,7 +646,7 @@ view: vw_medical {
           ${primary_procedure_code} NOT IN ('0HTU0ZZ', '0HTV0ZZ', '0HTT0ZZ', '19303', '19304', '19305', '19306', '19307', '19200', '19220', '19180', '19240'))
           THEN 'ELIGIBLE - BREAST CANCER SCREENING'
         WHEN ((${patient_gender} = 'F') AND (${patient_age} >= 21 AND ${patient_age} <= 64)) AND
-          (${reconciled_diagnosis_code_icd10} NOT IN ('Z90712', 'Z90710', 'Q515', '6185', 'V6701', 'V7647', 'V8801', 'V8803') OR
+          (${primary_diagnosis_code} NOT IN ('Z90712', 'Z90710', 'Q515', '6185', 'V6701', 'V7647', 'V8801', 'V8803') OR
           ${primary_procedure_code} NOT IN ('684', '685', '686', '687', '688', '56308', '51925', '57540', '57545', '57550', '57555', '57556',
             '58150', '58152', '58200', '58210', '58240', '58260', '58262', '58263', '58267', '58270', '58275', '58280', '58285', '58290', '58291',
             '58292', '58293', '58294', '58548', '58550', '58551', '58552', '58553', '58554', '58570', '58571', '58572', '58573', '58951', '58953',
@@ -686,7 +689,7 @@ view: vw_medical {
     description: "Cancer Screening to identfy Patients who had screening for Breast/Cervical/Colon Cancer."
     sql: CASE WHEN ${patient_gender} = 'F' AND (${patient_age} >= 50 AND ${patient_age} <= 74) AND
           (${reconciled_diagnosis_code_icd10} IN ('V7611', 'V7612', 'Z1231', 'V7611', 'V7612', 'Z1231') OR
-          ${primary_procedure_code} IN ('77055', '77056', '77057', '77061', '77062', '77063', '77065', '77066', '77067', 'G0202', 'G0204', 'G0206'))
+          ${primary_procedure_code} IN ('77055', '77056', '77057', '77061', '77062', '77063', '77065', '77066', 'G0202', 'G0204', 'G0206'))
           THEN 'BREAST CANCER SCREENING'
         WHEN ${patient_gender} = 'F' AND (${patient_age} >= 21 AND ${patient_age} <= 64) AND
           (${reconciled_diagnosis_code_icd10} IN ('V7232', 'Z124') OR
@@ -851,6 +854,8 @@ view: vw_medical {
     sql: ${TABLE}."TRUE_MSK_FLAG" ;;
   }
 
+
+
   dimension: TRUE_MSK_PROCEDURE_HEADER {
     type: string
     label: "TRUE MSK PROCEDURE"
@@ -859,7 +864,6 @@ view: vw_medical {
 
   dimension: Foot_Exam_Flag {
     type: string
-    hidden: yes
     sql: CASE WHEN ${primary_procedure_code} IN ('2028F', 'G0247', '2028F') THEN 'TRUE'
       ELSE 'FALSE'
       END ;;
@@ -867,7 +871,6 @@ view: vw_medical {
 
   dimension: Eye_Exam_Flag {
     type: string
-    hidden: yes
     sql: CASE WHEN ${primary_procedure_code} IN ('67028', '67030', '67031', '67036', '67039',
         '67040', '67041', '67042', '67043', '67101', '67105', '67107', '67108', '67110', '67112', '67113', '67121', '67141', '67145', '67208', '67210', '67218', '67220', '67221', '67227', '67228', '92002', '92004', '92012', '92014', '92018', '92019', '92225', '92226', '92230', '92235', '92240', '92250', '92260', '92203', '99204', '99205', '99213', '99214', '99215', '2022F', '2024F', '2026F', '3072F', 'S0620', 'S0621', 'S3000') THEN 'TRUE'
       ELSE 'FALSE'
@@ -876,10 +879,26 @@ view: vw_medical {
 
   dimension: HbA1c_Flag {
     type: string
-    hidden: yes
     sql: CASE WHEN ${primary_procedure_code} IN ('83036', '83037') THEN 'TRUE'
       ELSE 'FALSE'
       END ;;
+  }
+
+  dimension: PARTICIPANT_Flag {
+    type: string
+    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+  }
+
+  dimension: Group_Number {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
+
+  dimension: insured_Flag {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
   }
 
   measure: Diabetes_and_No_Foot_exam {
@@ -887,6 +906,7 @@ view: vw_medical {
     label: "Diabetes, No Foot Exam"
     filters: [icd_chronic_cat: "DIABETES", Foot_Exam_Flag: "FALSE"]
     sql: ${unique_id} ;;
+    group_label: "Diabetes"
   }
 
   measure: Diabetes_and_No_Eye_exam {
@@ -894,6 +914,7 @@ view: vw_medical {
     label: "Diabetes, No Eye Exam"
     filters: [icd_chronic_cat: "DIABETES", Eye_Exam_Flag: "FALSE"]
     sql: ${unique_id} ;;
+    group_label: "Diabetes"
   }
 
   measure: Diabetes_and_No_HbA1c_exam {
@@ -901,6 +922,7 @@ view: vw_medical {
     label: "Diabetes, No HbA1c"
     filters: [icd_chronic_cat: "DIABETES", HbA1c_Flag: "FALSE"]
     sql: ${unique_id} ;;
+    group_label: "Diabetes"
   }
 
   measure: Paid_date_Min {
@@ -917,21 +939,15 @@ view: vw_medical {
     html: {{ rendered_value | date: "%m / %d / %Y" }} ;;
   }
 
-  dimension: PARTICIPANT_Flag {
+  dimension: Patient_DOB{
     type: string
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+    label: "Patient DOB"
+    sql: ${TABLE}."PATIENT_DOB";;
   }
 
-  dimension: year_and_patient_id {
+  dimension: PARTICIPANT_PROGRAM_NAME{
     type: string
-    hidden: yes
-    sql: CONCAT(${Paid_year}, ${unique_id}) ;;
+    label: "PARTICIPANT_PROGRAM_NAME"
+    sql: ${TABLE}."PARTICIPANT_PROGRAM_NAME";;
   }
-
-  measure: total_yearwise_patient_spend {
-    type: sum
-    sql_distinct_key: ${year_and_patient_id} ;;
-    sql: ${total_employer_paid_amt}  ;;
-  }
-
 }

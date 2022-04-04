@@ -9,11 +9,13 @@ view: ad_hoc_query_tool_pharmacy {
           "TOTAL_BILLED_AMT" as Total_Billed_Amt_P,
           "TOTAL_EMPLOYER_PAID_AMT" as Total_Paid_Amt_P,
           "NON_PROPRIETARY_NAME" as Drug_List,
-          "TEA_CATEGORY" as TEA_Cat_List,
+          "TEA_CATEGORY" as TEA_Cat_List ,
+          "GROUP_NUMBER" as GROUP_NUMBER,
+          "INSURED_FLAG" as INSURED_FLAG,
           "PARTICIPANT_FLAG" as PARTICIPANT_FLAG,
           "MEMBER_AGE" as MEMBER_AGE
         from
-        "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_PHARMACY"
+        "SCH_ALL_HEALTH_CHOICE"."VW_PHARMACY"
         WHERE                                 /* Dynamic Filter condition*/
             {% condition DRUG %} "NON_PROPRIETARY_NAME" {% endcondition %} AND
             {% condition DRUG_CODE %} "DRUG_CODE" {% endcondition %} AND
@@ -30,29 +32,29 @@ view: ad_hoc_query_tool_pharmacy {
             {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %} AND
 
 
-            UNIQUE_ID IN (Select DISTINCT UNIQUE_ID from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_MEDICAL"
-            WHERE
-              {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
-              {% condition PROCEDURE_MAJOR_CATEGORY %} "PROCEDURE_CATEGORY" {% endcondition %} AND
-              {% condition PROCEDURE_SUBCATEGORY %} "PROCEDURE_SUB_CATEGORY" {% endcondition %} AND
-              {% condition DISEASE_SUBCATEGORY %} "DISEASE_SUB_CATEGORY" {% endcondition %} AND
-              {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
-              {% condition DIAGNOSIS_CODE %} "RECONCILED_DIAGNOSIS_CODE_ICD10" {% endcondition %} AND
-              {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %} AND
-              {% condition GENDER %} "PATIENT_GENDER" {% endcondition %} AND
-              {% condition EMPLOYEE_RELATIONSHIP %} "RELATIONSHIP_TO_EMPLOYEE" {% endcondition %} AND
-              {% condition PLACE_OF_SERVICE_DESC %} "PLACE_OF_SERVICE_DESCRIPTION" {% endcondition %} AND
-              {% condition MAJOR_DISEASE_DIABETES %} "ICD_MAJOR_DISEASE" {% endcondition %} AND
-              {% condition PROCEDURE_CODE_TYPE %} "PROCEDURE_CODE_TYPE" {% endcondition %} AND
-              {% condition PROCEDURE_CODE_DESC %} "PROCEDURE_DESCRIPTION" {% endcondition %} AND
-              {% condition PROCEDURE_CODE %} "PRIMARY_PROCEDURE_CODE" {% endcondition %} AND
-              {% condition LS_MODIFY_OR_NOT %} "ICD_LS_MODIFY" {% endcondition %} AND
-              {% condition ACUTE_OR_NOT %} "ICD_ACUTE" {% endcondition %} AND
-              {% condition PREVENTATIVE_OR_NOT %} "ICD_PREVENTATIVE" {% endcondition %} AND
-              {% condition CHRONIC_OR_NOT %} "2012_CHRONIC" {% endcondition %} AND
-              {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
-              {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %}
-            ) ;;
+      UNIQUE_ID IN (Select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
+      WHERE
+      {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
+      {% condition PROCEDURE_MAJOR_CATEGORY %} "PROCEDURE_CATEGORY" {% endcondition %} AND
+      {% condition PROCEDURE_SUBCATEGORY %} "PROCEDURE_SUB_CATEGORY" {% endcondition %} AND
+      {% condition DISEASE_SUBCATEGORY %} "DISEASE_SUB_CATEGORY" {% endcondition %} AND
+      {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
+      {% condition DIAGNOSIS_CODE %} "RECONCILED_DIAGNOSIS_CODE_ICD10" {% endcondition %} AND
+      {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %} AND
+      {% condition GENDER %} "PATIENT_GENDER" {% endcondition %} AND
+      {% condition EMPLOYEE_RELATIONSHIP %} "RELATIONSHIP_TO_EMPLOYEE" {% endcondition %} AND
+      {% condition PLACE_OF_SERVICE_DESC %} "PLACE_OF_SERVICE_DESCRIPTION" {% endcondition %} AND
+      {% condition MAJOR_DISEASE_DIABETES %} "ICD_MAJOR_DISEASE" {% endcondition %} AND
+      {% condition PROCEDURE_CODE_TYPE %} "PROCEDURE_CODE_TYPE" {% endcondition %} AND
+      {% condition PROCEDURE_CODE_DESC %} "PROCEDURE_DESCRIPTION" {% endcondition %} AND
+      {% condition PROCEDURE_CODE %} "PRIMARY_PROCEDURE_CODE" {% endcondition %} AND
+      {% condition LS_MODIFY_OR_NOT %} "ICD_LS_MODIFY" {% endcondition %} AND
+      {% condition ACUTE_OR_NOT %} "ICD_ACUTE" {% endcondition %} AND
+      {% condition PREVENTATIVE_OR_NOT %} "ICD_PREVENTATIVE" {% endcondition %} AND
+      {% condition CHRONIC_OR_NOT %} "2012_CHRONIC" {% endcondition %} AND
+      {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
+      {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %}
+      ) ;;
   }
 
   #All the MEDICAL table Filter, Dimension & Measures.
@@ -287,7 +289,6 @@ view: ad_hoc_query_tool_pharmacy {
   }
 
 
-
   filter: BLACK_LABEL_DRUG {
     type: string
     label: "BLACK LABEL DRUG"
@@ -388,13 +389,30 @@ view: ad_hoc_query_tool_pharmacy {
     sql: ${TABLE}."MEMBER_AGE" ;;
   }
 
-  dimension: Age_Group {
+  dimension: ageGroup {
     type: tier
     label: "AGE GROUP-2"
     tiers: [20, 30, 40, 50, 60]
+    # drill_fields: [icd_disease_category, DIAGNOSIS_SUB_CATEGORY, icd_description, PROCEDURE_CATEGORY, PROCEDURE_SUBCATEGORY, procedure_description, icd_chronic_cat]
     description: "AGE Group>> 0-19, 20-29, 30-39, 40-49, 50-59 & >=60 yrs"
     style: integer
     sql:  ${TABLE}."MEMBER_AGE";;
   }
 
+  dimension: PARTICIPANT_Flag {
+    type: string
+    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+  }
+
+  dimension: GROUP_NUMBER {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
+
+  dimension: INSURED_FLAG {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
+  }
 }

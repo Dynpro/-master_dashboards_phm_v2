@@ -1,9 +1,9 @@
 view: vw_risk_group_migration {
   label: "Risk Group Summary"
   derived_table: {
-    sql: select * from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_RISK_GROUP_MIGRATION"
-        WHERE
-        UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_MEDICAL"
+    sql: select * from "SCH_ALL_HEALTH_CHOICE"."VW_RISK_GROUP_MIGRATION"
+          WHERE
+          UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
           WHERE
           {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
           {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
@@ -51,7 +51,7 @@ view: vw_risk_group_migration {
   }
 
   dimension: File_year {
-    type: string
+    type: number
     sql: ${TABLE}."FILE_YEAR" ;;
   }
 
@@ -203,6 +203,35 @@ view: vw_risk_group_migration {
     sql: ${TABLE}."PARTICIPANT_FLAG" ;;
   }
 
+  dimension: patient_age {
+    type: number
+    label: "PATIENT AGE"
+    sql: ${TABLE}."PATIENT_AGE" ;;
+  }
 
+  dimension: Age_Group {
+    type: tier
+    label: "AGE GROUP-2"
+    tiers: [20, 30, 40, 50, 60]
+    description: "AGE Group>> 0-19, 20-29, 30-39, 40-49, 50-59 & >=60 yrs"
+    style: integer
+    sql: ${TABLE}."PATIENT_AGE" ;;
+  }
+  dimension: Group_Number {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
 
+  dimension: insured_Flag {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
+  }
+  measure: Total_Patients_1 {
+    label: "N1"
+    sql: case when ${Total_Patients} is null then 0
+          else 1
+          end;;
+  }
 }

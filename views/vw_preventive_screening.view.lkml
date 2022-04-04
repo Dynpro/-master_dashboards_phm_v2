@@ -1,5 +1,5 @@
 view: vw_preventive_screening {
-  sql_table_name: "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_PREVENTIVE_SCREENING"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."VW_PREVENTIVE_SCREENING"
     ;;
 
   dimension: cancer_diagnosis {
@@ -58,6 +58,7 @@ view: vw_preventive_screening {
     sql: ${TABLE}."YEAR" ;;
   }
 
+
   measure: Total_Patients {
     type: count_distinct
     label: "N"
@@ -90,4 +91,42 @@ view: vw_preventive_screening {
     sql: ${TABLE}."PARTICIPANT_FLAG" ;;
   }
 
+  dimension: patient_gender {
+    type: string
+    label: "PATIENT GENDER"
+    sql: ${TABLE}."PATIENT_GENDER" ;;
+  }
+
+  dimension: patient_age {
+    type: number
+    label: "PATIENT AGE"
+    sql: ${TABLE}."PATIENT_AGE" ;;
+  }
+
+  dimension: Age_Group {
+    type: tier
+    label: "AGE GROUP"
+    tiers: [20, 30, 40, 50, 60]
+    description: "AGE Group>> 0-19, 20-29, 30-39, 40-49, 50-59 & >=60 yrs"
+    style: integer
+    sql:  ${patient_age};;
+  }
+
+  dimension: relationship_to_employee {
+    type: string
+    label: "RELATIONSHIP TO EMPLOYEE"
+    sql: ${TABLE}."RELATIONSHIP_TO_EMPLOYEE" ;;
+  }
+
+  dimension: Group_Number {
+    type: string
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
+
+  dimension: Insured_Flag {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
+  }
 }

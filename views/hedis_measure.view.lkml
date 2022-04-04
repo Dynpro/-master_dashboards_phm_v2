@@ -1,5 +1,5 @@
 view: hedis_measure {
-  sql_table_name: "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_HEDIS_MEASURES"
+  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."HEDIS_MEASURES"
     ;;
 
 ##ADULT'S ACCESS TO PREVENTIVE/AMBULATORY HEALTH SERVICES
@@ -458,7 +458,7 @@ view: hedis_measure {
   }
 
   dimension: year {
-    type: string
+    type: number
     label: "Year"
     sql: ${TABLE}."YEAR" ;;
   }

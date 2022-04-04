@@ -20,9 +20,11 @@ view: ad_hoc_query_tool_medical {
           "PROCEDURE_SUBCATEGORY" as PROCEDURE_SUB_CATEGORY,
           "PRIMARY_PROCEDURE_CODE" as PRIMARY_PROCEDURE_CODE,
           "PLACE_OF_SERVICE_DESCRIPTION" as PLACE_OF_SERVICE_DESCRIPTION,
-          "SERVICE_PROVIDER_SPECIALITY_CODE_DESC" as SERVICE_PROVIDER_SPECIALITY_CODE_DESC
+          "SERVICE_PROVIDER_SPECIALITY_CODE_DESC" as SERVICE_PROVIDER_SPECIALITY_CODE_DESC,
+          "GROUP_NUMBER" as GROUP_NUMBER,
+          "INSURED_FLAG" as INSURED_FLAG
          from
-        "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_MEDICAL"
+        "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
         WHERE                                 /* Dynamic Filter condition*/
             {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
             {% condition PROCEDURE_MAJOR_CATEGORY %} "PROCEDURE_CATEGORY" {% endcondition %} AND
@@ -45,25 +47,25 @@ view: ad_hoc_query_tool_medical {
             {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
             {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %} AND
 
-            UNIQUE_ID IN (Select DISTINCT UNIQUE_ID from "SCH_KAIROS_ARKANSAS_MUNICIPAL_LEAGUE"."LKR_TAB_PHARMACY"
-              WHERE
-                {% condition DRUG %} "NON_PROPRIETARY_NAME" {% endcondition %} AND
-                {% condition DRUG_CODE %} "DRUG_CODE" {% endcondition %} AND
-                {% condition TEA_CATEGORY %} "TEA_CATEGORY" {% endcondition %} AND
-                {% condition ACE_INHIBITOR_DRUGS %} "ACE_INHIBITOR" {% endcondition %} AND
-                {% condition STATIN_DRUGS %} "STATIN" {% endcondition %} AND
-                {% condition BETA_BLOCKER_DRUGS %} "BETA_BLOCKER" {% endcondition %} AND
-                {% condition ARB_DRUGS %} "ARB" {% endcondition %} AND
-                {% condition DRI_DRUGS %} "DRI" {% endcondition %} AND
-                {% condition BLACK_LABEL_DRUG %} "BLACK_LABEL_DRUG" {% endcondition %} AND
-                {% condition SPECIALTY_DRUGS %} "SPECIALTY_DRUGS" {% endcondition %} AND
-                {% condition MAINTENANCE_DRUGS %} "MAINTENANCE" {% endcondition %} AND
-                {% condition DIGESTIVE_DISEASE_DRUGS %} "DIGESTIVE_DISEASE" {% endcondition %} AND
-                {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %} AND
-                {% condition ACE_INHIBITOR_OR_ARB_DRUGS %} (CASE WHEN "ACE_INHIBITOR" = 'TRUE' OR "ARB" = 'TRUE' THEN 'TRUE'
-                  ELSE 'FALSE'
-                  END) {% endcondition %}
-            ) ;;
+      UNIQUE_ID IN (Select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."VW_PHARMACY"
+      WHERE
+      {% condition DRUG %} "NON_PROPRIETARY_NAME" {% endcondition %} AND
+      {% condition DRUG_CODE %} "DRUG_CODE" {% endcondition %} AND
+      {% condition TEA_CATEGORY %} "TEA_CATEGORY" {% endcondition %} AND
+      {% condition ACE_INHIBITOR_DRUGS %} "ACE_INHIBITOR" {% endcondition %} AND
+      {% condition STATIN_DRUGS %} "STATIN" {% endcondition %} AND
+      {% condition BETA_BLOCKER_DRUGS %} "BETA_BLOCKER" {% endcondition %} AND
+      {% condition ARB_DRUGS %} "ARB" {% endcondition %} AND
+      {% condition DRI_DRUGS %} "DRI" {% endcondition %} AND
+      {% condition BLACK_LABEL_DRUG %} "BLACK_LABEL_DRUG" {% endcondition %} AND
+      {% condition SPECIALTY_DRUGS %} "SPECIALTY_DRUGS" {% endcondition %} AND
+      {% condition MAINTENANCE_DRUGS %} "MAINTENANCE" {% endcondition %} AND
+      {% condition DIGESTIVE_DISEASE_DRUGS %} "DIGESTIVE_DISEASE" {% endcondition %} AND
+      {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %} AND
+      {% condition ACE_INHIBITOR_OR_ARB_DRUGS %} (CASE WHEN "ACE_INHIBITOR" = 'TRUE' OR "ARB" = 'TRUE' THEN 'TRUE'
+      ELSE 'FALSE'
+      END) {% endcondition %}
+      ) ;;
   }
 
   filter: DISEASE_CATEGORY {
@@ -472,9 +474,15 @@ view: ad_hoc_query_tool_medical {
     suggest_explore: vw_pharmacy
     suggest_dimension: vw_pharmacy.ace_inhibitor
   }
-
-  dimension: PARTICIPANT_Flag {
+  dimension: GROUP_NUMBER {
     type: string
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+    label: "GROUP NUMBER"
+    sql: ${TABLE}."GROUP_NUMBER" ;;
+  }
+
+  dimension: INSURED_FLAG {
+    type: string
+    label: "INSURED FLAG"
+    sql: ${TABLE}."INSURED_FLAG" ;;
   }
 }
