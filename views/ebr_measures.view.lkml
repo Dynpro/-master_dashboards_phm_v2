@@ -1,6 +1,11 @@
 view: ebr_measures {
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_EBR_MEASURES"
+  derived_table: {
+    sql: select * from "SCH_ALL_HEALTH_CHOICE"."EBR_MEASURES"
+      WHERE "UNIQUE_ID" IN (select DISTINCT "UNIQUE_ID" from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
+        WHERE {% condition PARTICIPANT_YEAR %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+        {% condition PARTICIPANT_Flag %} "PARTICIPANT_FLAG" {% endcondition %})
     ;;
+  }
 
   dimension: individual_gets_diabetic_test_strips {
     type: string
@@ -38,6 +43,7 @@ view: ebr_measures {
     description: "INDIVIDUAL HAD EMERGENCY ROOM VISIT but NO SUBSEQUENT INPATIENT VISIT"
     sql: ${TABLE}."INDIVIDUAL_HAD_EMERGENCY_ROOM_AND_INPATIENT_VISIT" ;;
   }
+
 
   measure: individual_had_emergency_room_and_inpatient_visit_patients {
     type: count_distinct
@@ -344,6 +350,7 @@ view: ebr_measures {
     type: number
     label: "Year"
     sql: ${TABLE}."YEAR" ;;
+    value_format: "0"
   }
 
   measure: total_patients {
@@ -358,9 +365,57 @@ view: ebr_measures {
     drill_fields: []
   }
 
-  dimension: PARTICIPANT_Flag {
+
+
+  dimension: Groups {
     type: string
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+    sql: ${TABLE}."INDIVIDUAL_IS_IN_DISEASE_GROUP";;
+  }
+
+  dimension: Groups1 {
+    type: string
+    sql: case when ${Groups} = 'GROUP-1' THEN 'Disease Grp-1'
+              when ${Groups} = 'GROUP-2' THEN 'Disease Grp-2'
+              when ${Groups} = 'GROUP-3' THEN 'Disease Grp-3'
+              when ${Groups} = 'GROUP-4' THEN 'Disease Grp-4'
+              when ${Groups} = 'GROUP-5' THEN 'Disease Grp-5'
+              when ${Groups} = 'GROUP-6' THEN 'Disease Grp-6'
+              when ${Groups} = 'GROUP-7' THEN 'Disease Grp-7'
+              when ${individual_gets_diabetic_test_strips} is null THEN 'Diabetes Test Strips'
+              when ${individual_gets_diabetic_test_strips_every_quarter}='1' THEN 'Diabetes Test Strips Quaterly'
+
+      ELSE '0'
+      END;;
+  }
+
+  dimension: Groups2 {
+    type: string
+    sql: case when ${Groups1} = 'Disease Grp-1' THEN 'no chronic disease and less than $1500 medical expenditures per 12 months'
+              when ${Groups1} = 'Disease Grp-2' THEN 'no chronic disease and $1500 or more medical expenditures per 12 months'
+              when ${Groups1} = 'Disease Grp-3' THEN 'one chronic disease'
+              when ${Groups1} = 'Disease Grp-4' THEN 'Two chronic disease'
+              when ${Groups1} = 'Disease Grp-5' THEN 'Three chronic disease'
+              when ${Groups1} = 'Disease Grp-6' THEN 'Four chronic disease'
+              when ${Groups1} = 'Disease Grp-7' THEN 'Five chronic disease'
+              when ${Groups1} = 'Disease Grp-7' THEN 'Five chronic disease'
+              when ${Groups1} = 'Diabetes Test Strips' THEN 'Individual gets Diabetic test strips'
+              when ${Groups1} = 'Diabetes Test Strips Quaterly' THEN 'Individual gets Diabetic test strips every quarter'
+          ELSE '0'
+          END;;
+  }
+
+  filter: PARTICIPANT_YEAR {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 
 }

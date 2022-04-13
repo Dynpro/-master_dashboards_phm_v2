@@ -1,7 +1,13 @@
 view: vw_medical {
   label: "Medical records"
-  sql_table_name: "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
-    ;;
+  derived_table: {
+    sql: select * from "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
+      WHERE "UNIQUE_ID" IN (select DISTINCT "UNIQUE_ID" from "SCH_ALL_HEALTH_CHOICE"."VW_MEDICAL"
+        WHERE {% condition PARTICIPANT_YEAR %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+        {% condition PARTICIPANT_Flag %} "PARTICIPANT_FLAG" {% endcondition %})
+      ;;
+  }
+
 
   dimension: 2012_chronic {
     type: string
@@ -854,8 +860,6 @@ view: vw_medical {
     sql: ${TABLE}."TRUE_MSK_FLAG" ;;
   }
 
-
-
   dimension: TRUE_MSK_PROCEDURE_HEADER {
     type: string
     label: "TRUE MSK PROCEDURE"
@@ -884,10 +888,6 @@ view: vw_medical {
       END ;;
   }
 
-  dimension: PARTICIPANT_Flag {
-    type: string
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
-  }
 
   dimension: Group_Number {
     type: string
@@ -950,4 +950,30 @@ view: vw_medical {
     label: "PARTICIPANT_PROGRAM_NAME"
     sql: ${TABLE}."PARTICIPANT_PROGRAM_NAME";;
   }
+
+  dimension: PARTICIPANT_NONPARTICIPANT_Flag {
+    type: string
+    hidden:  yes
+    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
+  }
+
+  dimension: participant_paid_year {
+    type: string
+    hidden: yes
+    sql: ${Paid_year} ;;
+  }
+  filter: PARTICIPANT_YEAR {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
+  }
+
 }

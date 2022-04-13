@@ -73,10 +73,13 @@ view: vw_med_and_pharma_summary_1 {
       {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %} AND
       {% condition PARTICIPANT_FLAG_M %} "PARTICIPANT_FLAG" {% endcondition %} AND
       {% condition GROUP_NUMBER_M %} "GROUP_NUMBER" {% endcondition %} AND
-      {% condition INSURED_FLAG_M %} "INSURED_FLAG" {% endcondition %}
+      {% condition INSURED_FLAG_M %} "INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_M %} "PARTICIPANT_PROGRAM_NAME" {% endcondition %} AND
+      "UNIQUE_ID" IN (select DISTINCT "UNIQUE_ID" from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
+      WHERE {% condition PARTICIPANT_YEAR %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+      {% condition PARTICIPANT_Flag %} "PARTICIPANT_FLAG" {% endcondition %})
 
-
-      GROUP BY PATIENT_ID_M, PATIENT_GENDER, RELATIONSHIP_TO_EMPLOYEE, substring("PAID_DATE", 1, 4), Diabetes_Flag) as MED
+      GROUP BY "UNIQUE_ID", PATIENT_GENDER, RELATIONSHIP_TO_EMPLOYEE, substring("PAID_DATE", 1, 4), Diabetes_Flag) as MED
 
       LEFT JOIN
 
@@ -117,9 +120,10 @@ view: vw_med_and_pharma_summary_1 {
       {% condition BRAND_OR_GENERIC %} "BRAND_OR_GENERIC" {% endcondition %} AND
       {% condition PARTICIPANT_FLAG_P %} "PARTICIPANT_FLAG" {% endcondition %} AND
       {% condition GROUP_NUMBER_P %} "GROUP_NUMBER" {% endcondition %} AND
-      {% condition INSURED_FLAG_P %} "INSURED_FLAG" {% endcondition %}
+      {% condition INSURED_FLAG_P %} "INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_P %} "PARTICIPANT_PROGRAM_NAME" {% endcondition %}
 
-      GROUP BY PATIENT_ID_P, substring("DATE_FILLED", 1, 4), ACE_INHIBITOR_List, ARB_DRUGS_List, DRI_DRUGS_List, STATIN_DRUGS_List) as PHARMA
+      GROUP BY "UNIQUE_ID", substring("DATE_FILLED", 1, 4), ACE_INHIBITOR_List, ARB_DRUGS_List, DRI_DRUGS_List, STATIN_DRUGS_List) as PHARMA
 
       ON                                  /*Join condition on MED & PHARMA tab */
       MED.PATIENT_ID_M = PHARMA.PATIENT_ID_P AND
@@ -256,6 +260,7 @@ view: vw_med_and_pharma_summary_1 {
 
   filter: PARTICIPANT_FLAG_M {
     type: string
+    hidden: yes
     label: "PARTICIPANT Flag M"
     suggest_explore: vw_medical
     suggest_dimension: vw_medical.PARTICIPANT_Flag
@@ -503,6 +508,7 @@ view: vw_med_and_pharma_summary_1 {
 
   filter: PARTICIPANT_FLAG_P {
     type: string
+    hidden: yes
     label: "PARTICIPANT Flag P"
     suggest_explore: vw_pharmacy
     suggest_dimension: vw_pharmacy.PARTICIPANT_Flag
@@ -613,5 +619,33 @@ view: vw_med_and_pharma_summary_1 {
     label: "Diabetes, No Statin Drug"
     filters: [Diabetes_Flag: "TRUE", STATIN_DRUGS_List: "FALSE"]
     sql: ${PATIENT_ID} ;;
+  }
+
+  filter:PARTICIPANT_PROGRAM_NAME_M {
+    type: string
+    label: "PARTICIPANT PROGRAM NAME M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter:PARTICIPANT_PROGRAM_NAME_P {
+    type: string
+    label: "PARTICIPANT PROGRAM NAME P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter: PARTICIPANT_YEAR {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 }

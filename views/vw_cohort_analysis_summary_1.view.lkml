@@ -41,7 +41,7 @@ view: vw_cohort_analysis_summary_1 {
       "PATIENT_GENDER" as PATIENT_GENDER,
       "RELATIONSHIP_TO_EMPLOYEE" as RELATIONSHIP_TO_EMPLOYEE
       from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
-      GROUP BY PATIENT_ID, PAID_YEAR, PATIENT_GENDER, RELATIONSHIP_TO_EMPLOYEE) MEDICAL
+      GROUP BY "UNIQUE_ID", substring("PAID_DATE", 1, 4), PATIENT_GENDER, RELATIONSHIP_TO_EMPLOYEE) MEDICAL
 
       LEFT JOIN
       (Select                                       /*All Dimension & Measure of Grp1*/
@@ -105,7 +105,13 @@ view: vw_cohort_analysis_summary_1 {
       {% condition ICD_DIGESTIVE_DISEASE_G1 %} M1."ICD_DIGESTIVE_DISEASE" {% endcondition %} AND
       {% condition RISK_GROUP_G1 %} M1."RISK_GROUP" {% endcondition %} AND
       {% condition MSK_MRS_CODE_CLASSIFICATION_G1 %} M1."MSK_MRS_CODE_CLASSIFICATION" {% endcondition %} AND
-      {% condition PARTICIPANT_FLAG_G1 %} M1."PARTICIPANT_FLAG" {% endcondition %}
+      {% condition PARTICIPANT_FLAG_G1 %} M1."PARTICIPANT_FLAG" {% endcondition %} AND
+      {% condition GROUP_NUMBER_G1 %} M1."GROUP_NUMBER" {% endcondition %} AND
+      {% condition INSURED_FLAG_G1 %} M1."INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_G1 %} M1."PARTICIPANT_PROGRAM_NAME" {% endcondition %} AND
+      "UNIQUE_ID" IN (select DISTINCT "UNIQUE_ID" from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
+      WHERE {% condition PARTICIPANT_YEAR_G1 %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+      {% condition PARTICIPANT_Flag_G1 %} "PARTICIPANT_FLAG" {% endcondition %})
 
       GROUP BY PATIENT_ID_M_G1, PAID_YEAR_G1, PATIENT_GENDER_G1, RELATIONSHIP_TO_EMPLOYEE_G1) as MED1
 
@@ -131,7 +137,10 @@ view: vw_cohort_analysis_summary_1 {
       {% condition MAINTENANCE_G1 %} P1."MAINTENANCE" {% endcondition %} AND
       {% condition DIGESTIVE_DISEASE_G1 %} P1."DIGESTIVE_DISEASE" {% endcondition %} AND
       {% condition BRAND_OR_GENERIC_G1 %} P1."BRAND_OR_GENERIC" {% endcondition %} AND
-      {% condition PARTICIPANT_FLAG_P_G1 %} P1."PARTICIPANT_FLAG" {% endcondition %}
+      {% condition PARTICIPANT_FLAG_P_G1 %} P1."PARTICIPANT_FLAG" {% endcondition %} AND
+      {% condition GROUP_NUMBER_P_G1 %} P1."GROUP_NUMBER" {% endcondition %} AND
+      {% condition INSURED_FLAG_P_G1 %} P1."INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_G1 %} P1."PARTICIPANT_PROGRAM_NAME" {% endcondition %}
 
       GROUP BY PATIENT_ID_P_G1, SERVICE_DATE_G1) as PHARMA1
 
@@ -206,7 +215,13 @@ view: vw_cohort_analysis_summary_1 {
       {% condition ICD_DIGESTIVE_DISEASE_G2 %} M2."ICD_DIGESTIVE_DISEASE" {% endcondition %} AND
       {% condition RISK_GROUP_G2 %} M2."RISK_GROUP" {% endcondition %} AND
       {% condition MSK_MRS_CODE_CLASSIFICATION_G2 %} M2."MSK_MRS_CODE_CLASSIFICATION" {% endcondition %} AND
-      {% condition PARTICIPANT_FLAG_G2 %} M2."PARTICIPANT_FLAG" {% endcondition %}
+      {% condition PARTICIPANT_FLAG_G2 %} M2."PARTICIPANT_FLAG" {% endcondition %} AND
+      {% condition GROUP_NUMBER_G2 %} M2."GROUP_NUMBER" {% endcondition %} AND
+      {% condition INSURED_FLAG_G2 %} M2."INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_G2 %} M2."PARTICIPANT_PROGRAM_NAME" {% endcondition %} AND
+      "UNIQUE_ID" IN (select DISTINCT "UNIQUE_ID" from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
+      WHERE {% condition PARTICIPANT_YEAR_G2 %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+      {% condition PARTICIPANT_Flag_G2 %} "PARTICIPANT_FLAG" {% endcondition %})
 
       GROUP BY PATIENT_ID_M_G2, PAID_YEAR_G2, PATIENT_GENDER_G2, RELATIONSHIP_TO_EMPLOYEE_G2) AS MED2
 
@@ -232,7 +247,10 @@ view: vw_cohort_analysis_summary_1 {
       {% condition MAINTENANCE_G2 %} P2."MAINTENANCE" {% endcondition %} AND
       {% condition DIGESTIVE_DISEASE_G2 %} P2."DIGESTIVE_DISEASE" {% endcondition %} AND
       {% condition BRAND_OR_GENERIC_G2 %} P2."BRAND_OR_GENERIC" {% endcondition %} AND
-      {% condition PARTICIPANT_FLAG_P_G2 %} P2."PARTICIPANT_FLAG" {% endcondition %}
+      {% condition PARTICIPANT_FLAG_P_G2 %} P2."PARTICIPANT_FLAG" {% endcondition %} AND
+      {% condition GROUP_NUMBER_P_G2 %} P2."GROUP_NUMBER" {% endcondition %} AND
+      {% condition INSURED_FLAG_P_G2 %} P2."INSURED_FLAG" {% endcondition %} AND
+      {% condition PARTICIPANT_PROGRAM_NAME_G2 %} P2."PARTICIPANT_PROGRAM_NAME" {% endcondition %}
 
       GROUP BY PATIENT_ID_P_G2, SERVICE_DATE_G2) AS PHARMA2
 
@@ -462,9 +480,24 @@ view: vw_cohort_analysis_summary_1 {
 
   filter: PARTICIPANT_FLAG_G1 {
     type: string
+    hidden: yes
     label: "G1 - PARTICIPANT Flag M"
     suggest_explore: vw_medical
-    suggest_dimension: vw_medical.PARTICIPANT_Flag
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
+  }
+
+  filter: PARTICIPANT_YEAR_G1 {
+    type: string
+    label: "G1 - PARTICIPANT YEAR"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag_G1 {
+    type: string
+    label: "G1 - PARTICIPANT Flag"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 
   dimension: PATIENT_ID_G1 {
@@ -604,6 +637,7 @@ view: vw_cohort_analysis_summary_1 {
 
   filter: PARTICIPANT_FLAG_P_G1 {
     type: string
+    hidden: yes
     label: "G1 - PARTICIPANT Flag P"
     suggest_explore: vw_pharmacy
     suggest_dimension: vw_pharmacy.PARTICIPANT_Flag
@@ -832,9 +866,24 @@ view: vw_cohort_analysis_summary_1 {
 
   filter: PARTICIPANT_FLAG_G2 {
     type: string
+    hidden: yes
     label: "G2 - PARTICIPANT Flag M"
     suggest_explore: vw_medical
     suggest_dimension: vw_medical.PARTICIPANT_Flag
+  }
+
+  filter: PARTICIPANT_YEAR_G2 {
+    type: string
+    label: "G2 - PARTICIPANT YEAR"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag_G2 {
+    type: string
+    label: "G2 - PARTICIPANT Flag"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 
   dimension: PATIENT_ID_G2 {
@@ -973,6 +1022,7 @@ view: vw_cohort_analysis_summary_1 {
 
   filter: PARTICIPANT_FLAG_P_G2 {
     type: string
+    hidden: yes
     label: "G2 - PARTICIPANT Flag P"
     suggest_explore: vw_pharmacy
     suggest_dimension: vw_pharmacy.PARTICIPANT_Flag
@@ -1013,4 +1063,88 @@ view: vw_cohort_analysis_summary_1 {
           END ;;
     value_format: "$#,##0"
   }
+
+  filter:PARTICIPANT_PROGRAM_NAME_G1 {
+    type: string
+    label: "G1 - PARTICIPANT PROGRAM NAME M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter:PARTICIPANT_PROGRAM_NAME_G2 {
+    type: string
+    label: "G2 - PARTICIPANT PROGRAM NAME M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter:PARTICIPANT_PROGRAM_NAME_P1 {
+    type: string
+    label: "G1 - PARTICIPANT PROGRAM NAME P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter:PARTICIPANT_PROGRAM_NAME_P2 {
+    type: string
+    label: "G2 - PARTICIPANT PROGRAM NAME P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.PARTICIPANT_PROGRAM_NAME
+  }
+
+  filter:GROUP_NUMBER_G1 {
+    type: string
+    label: "G1 - GROUP NUMBER M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.Group_Number
+  }
+
+  filter:GROUP_NUMBER_G2 {
+    type: string
+    label: "G2 - GROUP NUMBER M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.Group_Number
+  }
+
+  filter:GROUP_NUMBER_P_G1 {
+    type: string
+    label: "G1 - GROUP NUMBER P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.Group_Number
+  }
+
+  filter:GROUP_NUMBER_P_G2 {
+    type: string
+    label: "G2 - GROUP NUMBER P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.Group_Number
+  }
+  filter:INSURED_FLAG_G1 {
+    type: string
+    label: "G1 - INSURED FLAG M"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.insured_Flag
+  }
+
+  filter:INSURED_FLAG_G2 {
+    type: string
+    label: "G2 - INSURED FLAG M "
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.insured_Flag
+  }
+
+  filter:INSURED_FLAG_P_G1 {
+    type: string
+    label: "G1 - INSURED_FLAG P "
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.insured_Flag
+  }
+
+  filter:INSURED_FLAG_P_G2 {
+    type: string
+    label: "G2 - INSURED_FLAG P"
+    suggest_explore: vw_pharmacy
+    suggest_dimension: vw_pharmacy.insured_Flag
+  }
+
 }

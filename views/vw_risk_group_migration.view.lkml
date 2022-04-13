@@ -4,22 +4,24 @@ view: vw_risk_group_migration {
     sql: select * from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_RISK_GROUP_MIGRATION"
           WHERE
           UNIQUE_ID IN (select DISTINCT UNIQUE_ID from "SCH_ALL_HEALTH_CHOICE"."LKR_TAB_MEDICAL"
-          WHERE
-          {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
-          {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
-          {% condition DIAGNOSIS_CODE %} "RECONCILED_DIAGNOSIS_CODE_ICD10" {% endcondition %} AND
-          {% condition PROCEDURE_CODE_DESC %} "PROCEDURE_DESCRIPTION" {% endcondition %} AND
-          {% condition PROCEDURE_CODE %} "PRIMARY_PROCEDURE_CODE" {% endcondition %} AND
-          {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %} AND
-          {% condition GENDER %} "PATIENT_GENDER" {% endcondition %} AND
-          {% condition EMPLOYEE_RELATIONSHIP %} "RELATIONSHIP_TO_EMPLOYEE" {% endcondition %} AND
-          {% condition MAJOR_DISEASE_DIABETES %} "ICD_MAJOR_DISEASE" {% endcondition %} AND
-          {% condition ACUTE_OR_NOT %} "ICD_ACUTE" {% endcondition %} AND
-          {% condition PREVENTATIVE_OR_NOT %} "ICD_PREVENTATIVE" {% endcondition %} AND
-          {% condition CHRONIC_OR_NOT %} "2012_CHRONIC" {% endcondition %} AND
-          {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
-          {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %}
-          ) ;;
+            WHERE
+            {% condition DISEASE_CATEGORY %} "ICD_DISEASE_CATEGORY" {% endcondition %} AND
+            {% condition DISEASE_DESCRIPTION %} "ICD_DESCRIPTION" {% endcondition %} AND
+            {% condition DIAGNOSIS_CODE %} "RECONCILED_DIAGNOSIS_CODE_ICD10" {% endcondition %} AND
+            {% condition PROCEDURE_CODE_DESC %} "PROCEDURE_DESCRIPTION" {% endcondition %} AND
+            {% condition PROCEDURE_CODE %} "PRIMARY_PROCEDURE_CODE" {% endcondition %} AND
+            {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %} AND
+            {% condition GENDER %} "PATIENT_GENDER" {% endcondition %} AND
+            {% condition EMPLOYEE_RELATIONSHIP %} "RELATIONSHIP_TO_EMPLOYEE" {% endcondition %} AND
+            {% condition MAJOR_DISEASE_DIABETES %} "ICD_MAJOR_DISEASE" {% endcondition %} AND
+            {% condition ACUTE_OR_NOT %} "ICD_ACUTE" {% endcondition %} AND
+            {% condition PREVENTATIVE_OR_NOT %} "ICD_PREVENTATIVE" {% endcondition %} AND
+            {% condition CHRONIC_OR_NOT %} "2012_CHRONIC" {% endcondition %} AND
+            {% condition AVOIDABLE_ER_OR_NOT %} "ICD_AVOIDABLE_ER" {% endcondition %} AND
+            {% condition DIGESTIVE_DISEASE_OR_NOT %} "ICD_DIGESTIVE_DISEASE" {% endcondition %} AND
+            {% condition PARTICIPANT_YEAR %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+            {% condition PARTICIPANT_Flag %} "PARTICIPANT_FLAG" {% endcondition %})
+      ;;
   }
 
   drill_fields: [Unique_id, File_year, Risk_group, Total_paid_amt, Mean_paid_amt, Chronic, Chronic_count, Comorbid, Comorbid_count]
@@ -53,6 +55,7 @@ view: vw_risk_group_migration {
   dimension: File_year {
     type: number
     sql: ${TABLE}."FILE_YEAR" ;;
+    value_format: "0"
   }
 
   dimension: Risk_group {
@@ -197,12 +200,6 @@ view: vw_risk_group_migration {
     suggest_dimension: vw_medical.icd_digestive_disease
   }
 
-  dimension: PARTICIPANT_FLAG {
-    type: string
-    label: "PARTICIPANT Flag"
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
-  }
-
   dimension: patient_age {
     type: number
     label: "PATIENT AGE"
@@ -228,10 +225,25 @@ view: vw_risk_group_migration {
     label: "INSURED FLAG"
     sql: ${TABLE}."INSURED_FLAG" ;;
   }
+
   measure: Total_Patients_1 {
     label: "N1"
     sql: case when ${Total_Patients} is null then 0
           else 1
           end;;
+  }
+
+  filter: PARTICIPANT_YEAR {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 }

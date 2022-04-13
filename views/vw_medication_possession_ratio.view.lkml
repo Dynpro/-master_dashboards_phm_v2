@@ -18,7 +18,9 @@ view: vw_medication_possession_ratio {
               {% condition DISEASE_SUB_CATEGORY %} "DISEASE_SUB_CATEGORY" {% endcondition %} AND
               {% condition PROCEDURE_CATEGORY %} "PROCEDURE_CATEGORY" {% endcondition %} AND
               {% condition PROCEDURE_SUBCATEGORY %} "PROCEDURE_SUBCATEGORY" {% endcondition %} AND
-              {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %})
+              {% condition CHRONIC_CATEGORY %} "ICD_CHRONIC_CAT" {% endcondition %} AND
+              {% condition PARTICIPANT_YEAR %} LEFT("PAID_DATE", 4) {% endcondition %} AND
+              {% condition PARTICIPANT_Flag %} "PARTICIPANT_FLAG" {% endcondition %})
     ;;
   }
 
@@ -185,6 +187,7 @@ view: vw_medication_possession_ratio {
     type: number
     label: "Paid Year"
     sql: ${TABLE}."YEAR" ;;
+    value_format: "0"
   }
 
   dimension: Group_Number {
@@ -205,12 +208,6 @@ view: vw_medication_possession_ratio {
     sql: ${unique_id} ;;
   }
 
-  dimension: PARTICIPANT_FLAG {
-    type: string
-    label: "PARTICIPANT Flag"
-    sql: ${TABLE}."PARTICIPANT_FLAG" ;;
-  }
-
   dimension: patient_age {
     type: number
     label: "PATIENT AGE"
@@ -224,5 +221,19 @@ view: vw_medication_possession_ratio {
     description: "AGE Group>> 0-19, 20-29, 30-39, 40-49, 50-59 & >=60 yrs"
     style: integer
     sql:  ${patient_age};;
+  }
+
+  filter: PARTICIPANT_YEAR {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.participant_paid_year
+  }
+
+  filter: PARTICIPANT_Flag {
+    type: string
+    group_label: "PARTICIPANT FILTER"
+    suggest_explore: vw_medical
+    suggest_dimension: vw_medical.PARTICIPANT_NONPARTICIPANT_Flag
   }
 }
